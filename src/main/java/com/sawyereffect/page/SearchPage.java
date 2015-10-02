@@ -1,5 +1,6 @@
 package com.sawyereffect.page;
 
+import com.sawyereffect.util.StateHolder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -22,6 +23,7 @@ public class SearchPage {
 
     @FindBy(id = "ires")
     private WebElement resultsSection;
+    private StateHolder stateHolder = StateHolder.getInstance();
 
     public SearchPage(WebDriver driver) {
         this.driver = driver;
@@ -39,5 +41,11 @@ public class SearchPage {
         logger.debug("Results text is: {} ", text);
         return text.contains(results);
 
+    }
+
+    public void click_first_link_from_text_results() {
+        WebElement resultElement = resultsSection.findElement(By.className("srg")).findElement(By.tagName("a"));
+        stateHolder.put("clickedResult", resultElement.getText());
+        resultElement.click();
     }
 }
