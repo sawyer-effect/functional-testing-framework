@@ -4,7 +4,9 @@ import com.sawyereffect.util.DriverFactory;
 import com.sawyereffect.util.PropertyReader;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
+import cucumber.api.java.AfterStep;
 import cucumber.api.java.Before;
+import cucumber.api.java.BeforeStep;
 import cucumber.api.java.en.Given;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -67,5 +69,15 @@ public class StartingSteps {
         if (driverFactory != null) {
             driverFactory.destroyDriver();
         }
+    }
+
+    @BeforeStep
+    public void beforeStep(Scenario scenario) {
+        logger.debug("Executing before every step {}", scenario.getName());
+    }
+
+    @AfterStep
+    public void afterStep(Scenario scenario) {
+        logger.debug("Executing after every step {}", scenario.getName());
     }
 }
