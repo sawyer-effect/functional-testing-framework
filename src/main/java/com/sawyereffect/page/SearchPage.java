@@ -36,11 +36,9 @@ public class SearchPage {
     }
 
     public boolean isTextPresent(String results) {
-
         String text = driver.findElement(By.id("ires")).getAttribute("innerHTML");
         logger.debug("Results text is: {} ", text);
         return text.contains(results);
-
     }
 
     public void click_first_link_from_text_results() {
