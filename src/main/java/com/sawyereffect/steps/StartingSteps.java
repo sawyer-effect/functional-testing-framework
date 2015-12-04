@@ -38,7 +38,7 @@ public class StartingSteps {
         while (retry < 5 && !successfulLoad) {
             try {
                 driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-                driver.get(reader.getEnvironment());
+                driver.get(reader.getProperty("host"));
                 waitForPageLogoToLoad();
                 successfulLoad = true;
             } catch (TimeoutException te) {

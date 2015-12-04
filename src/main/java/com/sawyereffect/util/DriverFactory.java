@@ -27,52 +27,49 @@ public class DriverFactory {
             "--ignore-ssl-errors=true"
     };
 
+    private int width;
+    private int height;
+
     private WebDriver createNewDriverInstance() throws IOException {
 
         final WebDriver driver;
         final PropertyReader propertyReader = PropertyReader.getPropertyReader();
-        if (propertyReader.isRemoteExecution()) {
+        if (propertyReader.isPropertyTrue("remote_execution")) {
             driver = createRemoteDriver(propertyReader);
         } else {
             driver = createLocalDriver(propertyReader);
         }
 
+        width = Integer.parseInt(propertyReader.getProperty("window_width"));
+        height = Integer.parseInt(propertyReader.getProperty("window_height"));
+
+        driver.manage().window().setSize(new Dimension(width, height));
+
         return driver;
     }
 
     private WebDriver createLocalDriver(PropertyReader propertyReader) {
-        final String browser = propertyReader.getBrowser();
+        final String browser = propertyReader.getProperty("browser");
         final WebDriver driver;
         if ("chrome".equals(browser)) {
-
             driver = new ChromeDriver();
-
         } else if ("firefox".equals(browser)) {
-
             driver = new FirefoxDriver();
-
         } else {
-
             DesiredCapabilities capabilities = new DesiredCapabilities();
             capabilities.setJavascriptEnabled(true);
             capabilities.setCapability("phantomjs.cli.args", PHANTOM_JS_ARGS);
-            capabilities.setCapability("phantomjs.page.settings.userAgent", propertyReader.getUserAgent());
+            capabilities.setCapability("phantomjs.page.settings.userAgent", propertyReader.getProperty("user_agent"));
             driver = new PhantomJSDriver(capabilities);
-
         }
 
-        final int width = propertyReader.getWindowWidth();
-        final int height = propertyReader.getWindowHeight();
-        driver.manage().window().setSize(new Dimension(width, height));
-
         return driver;
-
     }
 
     private WebDriver createRemoteDriver(PropertyReader propertyReader) throws MalformedURLException {
         final WebDriver driver;
-        final String browser = propertyReader.getBrowser();
-        final String seleniumHubUrl = propertyReader.getSeleniumHubUrl();
+        final String browser = propertyReader.getProperty("browser");
+        final String seleniumHubUrl = propertyReader.getProperty("selenium_grid_hub_url");
         final URL seleniumHubRemoteAddress = new URL(seleniumHubUrl);
 
         if ("chrome".equals(browser)) {
@@ -87,15 +84,12 @@ public class DriverFactory {
 
             final DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
             capabilities.setCapability("phantomjs.cli.args", PHANTOM_JS_ARGS);
-            capabilities.setCapability("phantomjs.page.settings.userAgent", propertyReader.getUserAgent());
+            capabilities.setCapability("phantomjs.page.settings.userAgent", propertyReader.getProperty("user_agent"));
 
             driver = new RemoteWebDriver(seleniumHubRemoteAddress, capabilities);
 
         }
 
-        final int width = propertyReader.getWindowWidth();
-        final int height = propertyReader.getWindowHeight();
-        driver.manage().window().setSize(new Dimension(width, height));
         return driver;
     }
 

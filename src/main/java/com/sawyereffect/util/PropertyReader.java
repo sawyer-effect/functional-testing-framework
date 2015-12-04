@@ -10,16 +10,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertyReader {
-    public static final int DESKTOP_DEFAULT_WIDTH = 1200;
-    private static final int DESKTOP_DEFAULT_HEIGHT = 800;
     private static final String ENVIRONMENT = "environment";
     private static final String VIEWPORT = "viewport";
-    private static final String BROWSER = "browser";
-    private static final String USER_AGENT = "user.agent";
-    private static final String WINDOW_WIDTH = "window.width";
-    private static final String WINDOW_HEIGHT = "window.height";
-    private static final String REMOTE_EXECUTION = "remote.execution";
-    private static final String SELENIUM_GRID_HUB_URL = "selenium.grid.hub.url";
     private Properties properties = new Properties();
     private Logger logger = LoggerFactory.getLogger(PropertyReader.class);
     private static final PropertyReader propertyReader = new PropertyReader();
@@ -39,63 +31,34 @@ public class PropertyReader {
     private void loadProperties() throws IOException {
         String environment = System.getProperty(ENVIRONMENT, ENVIRONMENT);
         String viewport = System.getProperty(VIEWPORT, VIEWPORT);
-        String configurationFile = environment + "-" + viewport + ".properties";
+        String environmentFile = environment + ".properties";
+        String viewportFile = viewport + ".properties";
 
-        logger.info("Configuration file to be used {}", configurationFile);
+        logger.info("Environment configuration file to be used {}", environmentFile);
+        logger.info("Viewport configuration file to be used {}", viewportFile);
 
-        InputStream inputStream = new FileInputStream(configurationFile);
-        properties.load(inputStream);
+        InputStream environmentStream = new FileInputStream(environmentFile);
+        properties.load(environmentStream);
+
+        InputStream viewportStream = new FileInputStream(viewportFile);
+        properties.load(viewportStream);
     }
 
-    public String readProperty(String key) {
-        return properties.getProperty(key);
+    public String getProperty(String key) {
+        return readProperty(key);
     }
 
-
-    public String getBrowser() {
-        return readProperty(BROWSER);
+    public boolean isPropertyTrue(String key) {
+        return "true".equals(readProperty(key));
     }
 
-    public String getUserAgent() {
-        return readProperty(USER_AGENT);
-    }
+    private String readProperty(String key) {
+        String value = properties.getProperty(key);
 
-    public int getWindowWidth() {
-        String widthString = readProperty(WINDOW_WIDTH);
-        int width = 0;
-        try {
-            width = Integer.parseInt(widthString);
-        } catch (NumberFormatException nfe) {
-            width = DESKTOP_DEFAULT_WIDTH;
+        if (value == null) {
+            throw new RuntimeException("Key '" + key + "' is not defined in environment or viewport properties file");
         }
-        return width;
-    }
 
-    public int getWindowHeight() {
-        String heightString = readProperty(WINDOW_HEIGHT);
-        int height = 0;
-        try {
-            height = Integer.parseInt(heightString);
-        } catch (NumberFormatException nfe) {
-            height = DESKTOP_DEFAULT_HEIGHT;
-        }
-        return height;
-    }
-
-    public String getEnvironment() {
-        return readProperty(ENVIRONMENT);
-    }
-
-    public boolean isRemoteExecution() {
-        return "true".equals(System.getProperty(REMOTE_EXECUTION));
-    }
-
-
-    public String getSeleniumHubUrl() {
-        return readProperty(SELENIUM_GRID_HUB_URL);
-    }
-
-    public String getProperty(String property) {
-        return readProperty(property);
+        return value;
     }
 }
