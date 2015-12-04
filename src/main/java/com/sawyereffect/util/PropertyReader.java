@@ -48,8 +48,8 @@ public class PropertyReader {
         return readProperty(key);
     }
 
-    public boolean isPropertyTrue(String key) {
-        return "true".equals(readProperty(key));
+    public boolean isSystemPropertyTrue(String key) {
+        return "true".equals(System.getProperty(key));
     }
 
     private String readProperty(String key) {

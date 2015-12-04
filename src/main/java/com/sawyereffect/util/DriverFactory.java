@@ -34,7 +34,7 @@ public class DriverFactory {
 
         final WebDriver driver;
         final PropertyReader propertyReader = PropertyReader.getPropertyReader();
-        if (propertyReader.isPropertyTrue("remote_execution")) {
+        if (propertyReader.isSystemPropertyTrue("remote_execution")) {
             driver = createRemoteDriver(propertyReader);
         } else {
             driver = createLocalDriver(propertyReader);
