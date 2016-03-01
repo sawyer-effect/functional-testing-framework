@@ -9,17 +9,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.*;
 
 public class ConfluenceMarkupFormatTest {
 
     @Test
     public void shouldGetAllClassesDocumentation() throws IOException {
-        ConfluenceMarkupFormat confluenceMarkupFormat = new ConfluenceMarkupFormat();
+        final CommentClass commentClass = mock(CommentClass.class);
+        final ClassDoc classDoc = mock(ClassDoc.class);
 
-        ClassDoc classDoc = mock(ClassDoc.class);
+        ConfluenceMarkupFormat confluenceMarkupFormat = new ConfluenceMarkupFormat() {
+            @Override
+            public CommentClass createCommentClass(ClassDoc actual) {
+                assertSame(classDoc, actual);
+                return commentClass;
+            }
+        };
+
         FileWriter fileWriter = mock(FileWriter.class);
-        CommentTableGenerator commentTableGenerator = mock(CommentTableGenerator.class);
         String comment = "Google search page\n" +
                 " This page is used to search for terms in the outside world.";
 
@@ -58,11 +66,11 @@ public class ConfluenceMarkupFormatTest {
         commentTables.add(commentTableActions);
         commentTables.add(commentTableVerifications);
 
-        when(commentTableGenerator.generate(classDoc)).thenReturn(commentTables);
-        when(classDoc.commentText()).thenReturn(comment);
-        when(classDoc.qualifiedName()).thenReturn("com.sawyereffect.steps.SearchPageSteps");
+        when(commentClass.getClassComment()).thenReturn(comment);
+        when(commentClass.getClassQualifiedName()).thenReturn("com.sawyereffect.steps.SearchPageSteps");
+        when(commentClass.getCommentTables()).thenReturn(commentTables);
 
-        confluenceMarkupFormat.parse(classDoc, fileWriter, commentTableGenerator);
+        confluenceMarkupFormat.parse(classDoc, fileWriter);
 
         verify(fileWriter).write("\\\\\n" +
                 "h2. com.sawyereffect.steps.SearchPageSteps\n*Google search page*\n" +

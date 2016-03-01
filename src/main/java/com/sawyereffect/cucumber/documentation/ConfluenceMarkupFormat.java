@@ -17,20 +17,20 @@ public class ConfluenceMarkupFormat {
         FileWriter fileWriter = new FileWriter("confluence-markup-documentation.txt");
         CommentTableGenerator commentTableGenerator = new CommentTableGenerator();
         for (ClassDoc classDoc : classes) {
-            confluenceMarkupFormat.parse(classDoc, fileWriter, commentTableGenerator);
+            confluenceMarkupFormat.parse(classDoc, fileWriter);
         }
         fileWriter.close();
         return true;
     }
 
-    public void parse(ClassDoc classDoc, FileWriter fileWriter, CommentTableGenerator commentTableGenerator) throws IOException {
-        String classComment = classDoc.commentText();
-        String[] lines = classComment.split(LINE_BREAK);
+    public void parse(ClassDoc classDoc, FileWriter fileWriter) throws IOException {
+        CommentClass commentClass = createCommentClass(classDoc);
+        String[] lines = commentClass.getClassComment().split(LINE_BREAK);
         String header = lines[0];
         StringBuilder builder = new StringBuilder();
         builder.append("\\\\\n");
         builder.append("h2. ");
-        builder.append(classDoc.qualifiedName());
+        builder.append(commentClass.getClassQualifiedName());
         builder.append(LINE_BREAK);
         builder.append("*");
         builder.append(header);
@@ -42,7 +42,7 @@ public class ConfluenceMarkupFormat {
             builder.append(LINE_BREAK);
         }
 
-        List<CommentTable> commentTableList = commentTableGenerator.generate(classDoc);
+        List<CommentTable> commentTableList = commentClass.getCommentTables();
         for (int index = 0; index < commentTableList.size(); index++) {
             if (index > 0) {
                 builder.append("\\\\");
@@ -69,5 +69,9 @@ public class ConfluenceMarkupFormat {
             builder.append("|");
             builder.append(LINE_BREAK);
         }
+    }
+
+    public CommentClass createCommentClass(ClassDoc classDoc) {
+        return new CommentClass(classDoc, new CommentTableGenerator());
     }
 }
