@@ -33,7 +33,7 @@ public class SearchPageSteps extends DriverFactory {
      * Verify from results given an specific text is displayed.
      * @param results - text to be searched for validation.
      */
-    @Then("^Verify ([^\"]*) results should be displayed$")
+    @Then("^Verify ([^\"]*) results are displayed$")
     public void results_should_be_displayed(String results) throws Throwable {
         assertTrue(results + " should have been displayed", searchPage.isTextPresent(results));
     }
