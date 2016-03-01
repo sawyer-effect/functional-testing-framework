@@ -1,10 +1,6 @@
 package com.sawyereffect.cucumber.documentation;
 
 
-import com.sun.javadoc.AnnotationDesc;
-import com.sun.javadoc.MethodDoc;
-import com.sun.javadoc.ParamTag;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,26 +27,7 @@ public class CommentTable {
         return classifier;
     }
 
-    public void addRow(MethodDoc methodDoc) {
-        CommentRow commentRow = new CommentRow();
-        StringBuilder description = new StringBuilder();
-        description.append(methodDoc.commentText());
-        for (ParamTag paramTag : methodDoc.paramTags()) {
-            description.append("\n@param ");
-            description.append(paramTag.parameterName());
-            description.append(" ");
-            description.append(paramTag.parameterComment());
-        }
-
-        commentRow.setDescription(description.toString());
-        for (AnnotationDesc annotationDesc : methodDoc.annotations()) {
-            for (AnnotationDesc.ElementValuePair valuePair : annotationDesc.elementValues()) {
-                commentRow.setStep(valuePair.value().value().toString());
-            }
-        }
-
-        commentRow.setMethodName(methodDoc.name());
-
+    public void addRow(CommentRow commentRow) {
         getCommentRows().add(commentRow);
     }
 
