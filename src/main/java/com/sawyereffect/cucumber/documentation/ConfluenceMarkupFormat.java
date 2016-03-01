@@ -1,13 +1,11 @@
 package com.sawyereffect.cucumber.documentation;
 
-import com.sun.javadoc.*;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.RootDoc;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ConfluenceMarkupFormat {
 
@@ -17,14 +15,15 @@ public class ConfluenceMarkupFormat {
         ClassDoc[] classes = root.classes();
         ConfluenceMarkupFormat confluenceMarkupFormat = new ConfluenceMarkupFormat();
         FileWriter fileWriter = new FileWriter("confluence-markup-documentation.txt");
+        CommentTableGenerator commentTableGenerator = new CommentTableGenerator();
         for (ClassDoc classDoc : classes) {
-            confluenceMarkupFormat.parse(classDoc, fileWriter);
+            confluenceMarkupFormat.parse(classDoc, fileWriter, commentTableGenerator);
         }
         fileWriter.close();
         return true;
     }
 
-    public void parse(ClassDoc classDoc, FileWriter fileWriter) throws IOException {
+    public void parse(ClassDoc classDoc, FileWriter fileWriter, CommentTableGenerator commentTableGenerator) throws IOException {
         String classComment = classDoc.commentText();
         String[] lines = classComment.split(LINE_BREAK);
         String header = lines[0];
@@ -42,61 +41,31 @@ public class ConfluenceMarkupFormat {
             builder.append(lines[i]);
             builder.append(LINE_BREAK);
         }
-        Set<String> actionAnnotations = new HashSet<>();
-        actionAnnotations.add("When");
-        List<MethodDoc> actionMethodList = new ArrayList<>();
 
-        Set<String> verificationAnnotations = new HashSet<>();
-        verificationAnnotations.add("Then");
-        List<MethodDoc> verificationMethodList = new ArrayList<>();
-
-
-        for (MethodDoc methodDoc : classDoc.methods()) {
-            for (AnnotationDesc annotationDesc : methodDoc.annotations()) {
-                String annotationType = annotationDesc.annotationType().name();
-
-                if (actionAnnotations.contains(annotationType)) {
-                    actionMethodList.add(methodDoc);
-                }
-
-                if (verificationAnnotations.contains(annotationType)) {
-                    verificationMethodList.add(methodDoc);
-                }
+        List<CommentTable> commentTableList = commentTableGenerator.generate(classDoc);
+        for (int index = 0; index < commentTableList.size(); index++) {
+            if (index > 0) {
+                builder.append("\\\\");
+                builder.append(LINE_BREAK);
             }
+            markupCommentTable(builder, commentTableList.get(index));
         }
-
-
-        parseMethodsForAnnotations(builder, "ACTIONS", actionMethodList);
-        builder.append("\\\\");
-        builder.append(LINE_BREAK);
-        parseMethodsForAnnotations(builder, "VERIFICATIONS", verificationMethodList);
-
         fileWriter.write(builder.toString());
     }
 
-    private void parseMethodsForAnnotations(StringBuilder builder, String header, List<MethodDoc> methods) {
+    private void markupCommentTable(StringBuilder builder, CommentTable commentTable) {
         builder.append("||");
-        builder.append(header);
+        builder.append(commentTable.getClassification());
         builder.append("||");
         builder.append(LINE_BREAK);
         builder.append("||Method||Step||Description||\n");
-        for (MethodDoc methodDoc : methods) {
+        for (CommentRow commentRow : commentTable.getCommentRows()) {
             builder.append("|");
-            builder.append(methodDoc.name());
+            builder.append(commentRow.getMethodName());
             builder.append("|");
-            for (AnnotationDesc annotationDesc : methodDoc.annotations()) {
-                for (AnnotationDesc.ElementValuePair valuePair : annotationDesc.elementValues()) {
-                    builder.append(valuePair.value().value());
-                }
-            }
+            builder.append(commentRow.getStep());
             builder.append("|");
-            builder.append(methodDoc.commentText());
-            for (ParamTag paramTag : methodDoc.paramTags()) {
-                builder.append("\n@param ");
-                builder.append(paramTag.parameterName());
-                builder.append(" ");
-                builder.append(paramTag.parameterComment());
-            }
+            builder.append(commentRow.getDescription());
             builder.append("|");
             builder.append(LINE_BREAK);
         }
