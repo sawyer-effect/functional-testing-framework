@@ -101,7 +101,7 @@ public class ConfluenceMarkupFormatTest {
     }
 
     @Test
-    public void shouldDisplayEmptyTablesIfNoColumnRowsAreFound() throws IOException {
+    public void shouldDisplayEmptyRowsForTableIfNoColumnRowsAreFound() throws IOException {
 
         confluenceMarkupFormat.parse(classDoc, fileWriter);
 
