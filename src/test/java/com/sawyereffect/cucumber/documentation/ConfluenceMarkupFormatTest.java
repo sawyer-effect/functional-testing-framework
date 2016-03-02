@@ -2,6 +2,7 @@ package com.sawyereffect.cucumber.documentation;
 
 
 import com.sun.javadoc.ClassDoc;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileWriter;
@@ -14,33 +15,51 @@ import static org.mockito.Mockito.*;
 
 public class ConfluenceMarkupFormatTest {
 
-    @Test
-    public void shouldGetAllClassesDocumentation() throws IOException {
-        final CommentClass commentClass = mock(CommentClass.class);
-        final ClassDoc classDoc = mock(ClassDoc.class);
+    private CommentClass commentClass;
+    private ClassDoc classDoc;
+    private ConfluenceMarkupFormat confluenceMarkupFormat;
+    private FileWriter fileWriter;
+    private String comment;
+    private CommentTable commentTableActions;
+    private CommentTable commentTableVerifications;
+    private List<CommentTable> commentTables;
 
-        ConfluenceMarkupFormat confluenceMarkupFormat = new ConfluenceMarkupFormat() {
+    @Before
+    public void setUp() throws Exception {
+        commentClass = mock(CommentClass.class);
+        classDoc = mock(ClassDoc.class);
+        confluenceMarkupFormat = new ConfluenceMarkupFormat() {
             @Override
             public CommentClass createCommentClass(ClassDoc actual) {
                 assertSame(classDoc, actual);
                 return commentClass;
             }
         };
-
-        FileWriter fileWriter = mock(FileWriter.class);
-        String comment = "Google search page\n" +
+        fileWriter = mock(FileWriter.class);
+        comment = "Google search page\n" +
                 " This page is used to search for terms in the outside world.";
+        commentTableActions = new CommentTable("ACTIONS", "When");
+        commentTableVerifications = new CommentTable("VERIFICATIONS", "Then");
+        commentTables = new ArrayList<>();
 
-        CommentTable commentTableActions = new CommentTable("ACTIONS", "When");
+        when(commentClass.getClassComment()).thenReturn(comment);
+        when(commentClass.getClassQualifiedName()).thenReturn("com.sawyereffect.steps.SearchPageSteps");
+        when(commentClass.getCommentTables()).thenReturn(commentTables);
+
+        commentTables.add(commentTableActions);
+        commentTables.add(commentTableVerifications);
+
+    }
+
+    @Test
+    public void shouldGetAllClassesDocumentation() throws IOException {
+
         List<CommentRow> commentRowActions = new ArrayList<>();
         CommentRow action1 = new CommentRow();
         CommentRow action2 = new CommentRow();
 
-        CommentTable commentTableVerifications = new CommentTable("VERIFICATIONS", "Then");
         List<CommentRow> commentRowVerifications = new ArrayList<>();
         CommentRow verification = new CommentRow();
-
-        List<CommentTable> commentTables = new ArrayList<>();
 
         action1.setDescription("Executes a search given the term provided on the search page.\n" +
                 "@param searchTerm - term to be searched.");
@@ -63,12 +82,6 @@ public class ConfluenceMarkupFormatTest {
 
         commentTableVerifications.setCommentRows(commentRowVerifications);
 
-        commentTables.add(commentTableActions);
-        commentTables.add(commentTableVerifications);
-
-        when(commentClass.getClassComment()).thenReturn(comment);
-        when(commentClass.getClassQualifiedName()).thenReturn("com.sawyereffect.steps.SearchPageSteps");
-        when(commentClass.getCommentTables()).thenReturn(commentTables);
 
         confluenceMarkupFormat.parse(classDoc, fileWriter);
 
@@ -85,6 +98,21 @@ public class ConfluenceMarkupFormatTest {
                 "|results_should_be_displayed|^Verify ([^\"]*) results should be displayed$|Verify from results given an specific text is displayed.\n" +
                 "@param results - text to be searched for validation.|\n");
 
+    }
+
+    @Test
+    public void shouldDisplayEmptyTablesIfNoColumnRowsAreFound() throws IOException {
+
+        confluenceMarkupFormat.parse(classDoc, fileWriter);
+
+
+        verify(fileWriter).write("\\\\\n" +
+                "h2. com.sawyereffect.steps.SearchPageSteps\n*Google search page*\n" +
+                " This page is used to search for terms in the outside world.\n||ACTIONS||\n" +
+                "||Method||Step||Description||\n" +
+                "\\\\\n" +
+                "||VERIFICATIONS||\n" +
+                "||Method||Step||Description||\n");
     }
 
 }
