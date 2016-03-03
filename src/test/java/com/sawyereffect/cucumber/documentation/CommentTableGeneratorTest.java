@@ -2,6 +2,7 @@ package com.sawyereffect.cucumber.documentation;
 
 
 import com.sun.javadoc.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -12,117 +13,145 @@ import static org.mockito.Mockito.when;
 
 public class CommentTableGeneratorTest {
 
+    private CommentTableGenerator commentTableGenerator;
+
+    @Before
+    public void setUp() {
+        commentTableGenerator = new CommentTableGenerator();
+    }
+
     @Test
     public void shouldRetrieveOnlyMatchingMethods() {
 
         ClassDoc classDoc = mock(ClassDoc.class);
-        MethodDoc methodDoc1 = mock(MethodDoc.class);
-        MethodDoc methodDoc2 = mock(MethodDoc.class);
-        MethodDoc methodDoc3 = mock(MethodDoc.class);
+        MethodDoc methodWhen = mock(MethodDoc.class);
+        MethodDoc methodThen = mock(MethodDoc.class);
+        MethodDoc methodGiven = mock(MethodDoc.class);
+        MethodDoc methodAnd = mock(MethodDoc.class);
+        MethodDoc methodBut = mock(MethodDoc.class);
 
-        MethodDoc[] methodDocs = new MethodDoc[]{methodDoc1, methodDoc3, methodDoc2};
-        ParamTag paramTag = mock(ParamTag.class);
-        ParamTag paramTag3 = mock(ParamTag.class);
+        MethodDoc[] methodDocs = new MethodDoc[]{methodWhen, methodGiven, methodThen, methodAnd, methodBut};
 
-        ParamTag[] paramTags = new ParamTag[]{paramTag};
-        ParamTag[] paramTags2 = new ParamTag[]{};
-        ParamTag[] paramTags3 = new ParamTag[]{paramTag3};
+        AnnotationDesc annotationDescWhen = mock(AnnotationDesc.class);
+        AnnotationDesc annotationDescGiven = mock(AnnotationDesc.class);
+        AnnotationDesc annotationDescThen = mock(AnnotationDesc.class);
+        AnnotationDesc annotationDescAnd = mock(AnnotationDesc.class);
+        AnnotationDesc annotationDescBut = mock(AnnotationDesc.class);
 
-        AnnotationDesc annotationDesc1 = mock(AnnotationDesc.class);
-        AnnotationDesc annotationDesc2 = mock(AnnotationDesc.class);
-        AnnotationDesc annotationDesc3 = mock(AnnotationDesc.class);
+        AnnotationDesc[] annotationsDescWhen = new AnnotationDesc[]{annotationDescWhen};
+        AnnotationDesc[] annotationsDescGiven = new AnnotationDesc[]{annotationDescGiven};
+        AnnotationDesc[] annotationsDescThen = new AnnotationDesc[]{annotationDescThen};
+        AnnotationDesc[] annotationsDescAnd = new AnnotationDesc[]{annotationDescAnd};
+        AnnotationDesc[] annotationsDescBut = new AnnotationDesc[]{annotationDescBut};
 
-        AnnotationDesc[] annotationsDesc1 = new AnnotationDesc[]{annotationDesc1};
-        AnnotationDesc[] annotationsDesc2 = new AnnotationDesc[]{annotationDesc2};
-        AnnotationDesc[] annotationsDesc3 = new AnnotationDesc[]{annotationDesc3};
+        AnnotationTypeDoc annotationWhen = mock(AnnotationTypeDoc.class);
+        AnnotationTypeDoc annotationGiven = mock(AnnotationTypeDoc.class);
+        AnnotationTypeDoc annotationThen = mock(AnnotationTypeDoc.class);
+        AnnotationTypeDoc annotationAnd = mock(AnnotationTypeDoc.class);
+        AnnotationTypeDoc annotationBut = mock(AnnotationTypeDoc.class);
 
-        AnnotationDesc.ElementValuePair elementValue1 = mock(AnnotationDesc.ElementValuePair.class);
-        AnnotationDesc.ElementValuePair elementValue2 = mock(AnnotationDesc.ElementValuePair.class);
-        AnnotationDesc.ElementValuePair elementValue3 = mock(AnnotationDesc.ElementValuePair.class);
+        when(annotationWhen.name()).thenReturn("When");
+        when(annotationGiven.name()).thenReturn("Given");
+        when(annotationThen.name()).thenReturn("Then");
+        when(annotationAnd.name()).thenReturn("And");
+        when(annotationBut.name()).thenReturn("But");
 
-        AnnotationDesc.ElementValuePair[] elementValues1 = new AnnotationDesc.ElementValuePair[]{elementValue1};
-        AnnotationDesc.ElementValuePair[] elementValues2 = new AnnotationDesc.ElementValuePair[]{elementValue2};
-        AnnotationDesc.ElementValuePair[] elementValues3 = new AnnotationDesc.ElementValuePair[]{elementValue3};
+        when(annotationDescWhen.annotationType()).thenReturn(annotationWhen);
+        when(annotationDescGiven.annotationType()).thenReturn(annotationGiven);
+        when(annotationDescThen.annotationType()).thenReturn(annotationThen);
+        when(annotationDescAnd.annotationType()).thenReturn(annotationAnd);
+        when(annotationDescBut.annotationType()).thenReturn(annotationBut);
 
+        when(methodWhen.annotations()).thenReturn(annotationsDescWhen);
+        when(methodGiven.annotations()).thenReturn(annotationsDescGiven);
+        when(methodThen.annotations()).thenReturn(annotationsDescThen);
+        when(methodAnd.annotations()).thenReturn(annotationsDescAnd);
+        when(methodBut.annotations()).thenReturn(annotationsDescBut);
+
+
+        when(classDoc.methods()).thenReturn(methodDocs);
+
+        CommentTableGenerator commentTableGenerator = new CommentTableGenerator() {
+            @Override
+            public CommentRow createCommentRow(MethodDoc methodDoc) {
+                return new CommentRow();
+            }
+        };
+
+        List<CommentTable> commentTables = commentTableGenerator.generate(classDoc);
+
+        CommentTable commentActionsTable = commentTables.get(0);
+        assertEquals("ACTIONS", commentActionsTable.getClassification());
+        assertEquals("Should have only one item", 1, commentActionsTable.getCommentRows().size());
+
+        CommentTable commentVerificationsTable = commentTables.get(1);
+        assertEquals("VERIFICATIONS", commentVerificationsTable.getClassification());
+        assertEquals("Should have only one item", 1, commentVerificationsTable.getCommentRows().size());
+
+
+        CommentTable commentPreconditionsTable = commentTables.get(2);
+        assertEquals("PRECONDITIONS", commentPreconditionsTable.getClassification());
+        assertEquals("Should have only one item", 1, commentPreconditionsTable.getCommentRows().size());
+
+        CommentTable commentUnknownTable = commentTables.get(3);
+        assertEquals("UNKNOWN", commentUnknownTable.getClassification());
+        assertEquals("Should have two items", 2, commentUnknownTable.getCommentRows().size());
+
+
+    }
+
+    @Test
+    public void shouldCreateCommentRowWithParametersProperly() {
+        MethodDoc methodDoc = mock(MethodDoc.class);
         AnnotationValue annotationValue1 = mock(AnnotationValue.class);
-        AnnotationValue annotationValue2 = mock(AnnotationValue.class);
-        AnnotationValue annotationValue3 = mock(AnnotationValue.class);
-
-        AnnotationTypeDoc annotationType1 = mock(AnnotationTypeDoc.class);
-        AnnotationTypeDoc annotationType2 = mock(AnnotationTypeDoc.class);
-        AnnotationTypeDoc annotationType3 = mock(AnnotationTypeDoc.class);
+        AnnotationDesc.ElementValuePair elementValue1 = mock(AnnotationDesc.ElementValuePair.class);
+        AnnotationDesc.ElementValuePair[] elementValues1 = new AnnotationDesc.ElementValuePair[]{elementValue1};
+        AnnotationDesc annotationDesc1 = mock(AnnotationDesc.class);
+        AnnotationDesc[] annotationsDesc1 = new AnnotationDesc[]{annotationDesc1};
+        ParamTag paramTag = mock(ParamTag.class);
+        ParamTag[] paramTags = new ParamTag[]{paramTag};
 
         when(annotationValue1.value()).thenReturn("^She enters ([^\"]*)$");
-        when(annotationValue2.value()).thenReturn("^Click on the first link from text results$");
-        when(annotationValue3.value()).thenReturn("^Verify ([^\"]*) results should be displayed$");
-
         when(elementValue1.value()).thenReturn(annotationValue1);
-        when(elementValue2.value()).thenReturn(annotationValue2);
-        when(elementValue3.value()).thenReturn(annotationValue3);
-
-        when(annotationType1.name()).thenReturn("When");
-        when(annotationType2.name()).thenReturn("When");
-        when(annotationType3.name()).thenReturn("Then");
-
-        when(annotationDesc1.annotationType()).thenReturn(annotationType1);
-        when(annotationDesc2.annotationType()).thenReturn(annotationType2);
-        when(annotationDesc3.annotationType()).thenReturn(annotationType3);
-
         when(annotationDesc1.elementValues()).thenReturn(elementValues1);
-        when(annotationDesc2.elementValues()).thenReturn(elementValues2);
-        when(annotationDesc3.elementValues()).thenReturn(elementValues3);
-
         when(paramTag.parameterName()).thenReturn("searchTerm");
         when(paramTag.parameterComment()).thenReturn("- term to be searched.");
+        when(methodDoc.commentText()).thenReturn("Executes a search given the term provided on the search page.");
+        when(methodDoc.name()).thenReturn("she_enters");
+        when(methodDoc.annotations()).thenReturn(annotationsDesc1);
+        when(methodDoc.paramTags()).thenReturn(paramTags);
 
-        when(paramTag3.parameterName()).thenReturn("results");
-        when(paramTag3.parameterComment()).thenReturn("- text to be searched for validation.");
+        CommentRow actual = commentTableGenerator.createCommentRow(methodDoc);
 
-        when(methodDoc1.commentText()).thenReturn("Executes a search given the term provided on the search page.");
-        when(methodDoc1.name()).thenReturn("she_enters");
-        when(methodDoc1.annotations()).thenReturn(annotationsDesc1);
-        when(methodDoc1.paramTags()).thenReturn(paramTags);
+        assertEquals("Executes a search given the term provided on the search page.\n" +
+                "@param searchTerm - term to be searched.", actual.getDescription());
+        assertEquals("^She enters ([^\"]*)$", actual.getStep());
+        assertEquals("she_enters", actual.getMethodName());
+    }
 
+    @Test
+    public void shouldCreateCommentRowNoParameters() {
+        MethodDoc methodDoc2 = mock(MethodDoc.class);
+        AnnotationDesc annotationDesc2 = mock(AnnotationDesc.class);
+        AnnotationDesc[] annotationsDesc2 = new AnnotationDesc[]{annotationDesc2};
+        ParamTag[] paramTags2 = new ParamTag[]{};
+        AnnotationDesc.ElementValuePair elementValue2 = mock(AnnotationDesc.ElementValuePair.class);
+        AnnotationDesc.ElementValuePair[] elementValues2 = new AnnotationDesc.ElementValuePair[]{elementValue2};
+        AnnotationValue annotationValue2 = mock(AnnotationValue.class);
+
+        when(annotationValue2.value()).thenReturn("^Click on the first link from text results$");
+        when(elementValue2.value()).thenReturn(annotationValue2);
         when(methodDoc2.commentText()).thenReturn("User hits the first result available.");
         when(methodDoc2.name()).thenReturn("click_on_the_first_link_from_text_results");
         when(methodDoc2.annotations()).thenReturn(annotationsDesc2);
         when(methodDoc2.paramTags()).thenReturn(paramTags2);
+        when(annotationDesc2.elementValues()).thenReturn(elementValues2);
 
-        when(methodDoc3.commentText()).thenReturn("Verify from results given an specific text is displayed.");
-        when(methodDoc3.name()).thenReturn("results_should_be_displayed");
-        when(methodDoc3.annotations()).thenReturn(annotationsDesc3);
-        when(methodDoc3.paramTags()).thenReturn(paramTags3);
-
-        when(classDoc.methods()).thenReturn(methodDocs);
-
-        CommentTableGenerator commentTableGenerator = new CommentTableGenerator();
-
-        List<CommentTable> commentTables = commentTableGenerator.generate(classDoc);
-
-        CommentTable commentTable1 = commentTables.get(0);
-        CommentRow commentRow1 = commentTable1.getCommentRows().get(0);
-        CommentRow commentRow2 = commentTable1.getCommentRows().get(1);
-
-        assertEquals("ACTIONS", commentTable1.getClassification());
-
-        assertEquals("Executes a search given the term provided on the search page.\n" +
-                "@param searchTerm - term to be searched.", commentRow1.getDescription());
-        assertEquals("^She enters ([^\"]*)$", commentRow1.getStep());
-        assertEquals("she_enters", commentRow1.getMethodName());
+        CommentRow commentRow2 = commentTableGenerator.createCommentRow(methodDoc2);
 
         assertEquals("User hits the first result available.", commentRow2.getDescription());
         assertEquals("^Click on the first link from text results$", commentRow2.getStep());
         assertEquals("click_on_the_first_link_from_text_results", commentRow2.getMethodName());
-
-        CommentTable commentTable2 = commentTables.get(1);
-        CommentRow commentRow3 = commentTable2.getCommentRows().get(0);
-
-        assertEquals("VERIFICATIONS", commentTable2.getClassification());
-
-        assertEquals("Verify from results given an specific text is displayed.\n" +
-                "@param results - text to be searched for validation.", commentRow3.getDescription());
-        assertEquals("^Verify ([^\"]*) results should be displayed$", commentRow3.getStep());
-        assertEquals("results_should_be_displayed", commentRow3.getMethodName());
 
     }
 

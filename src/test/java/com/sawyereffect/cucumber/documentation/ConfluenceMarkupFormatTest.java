@@ -38,8 +38,8 @@ public class ConfluenceMarkupFormatTest {
         fileWriter = mock(FileWriter.class);
         comment = "Google search page\n" +
                 " This page is used to search for terms in the outside world.";
-        commentTableActions = new CommentTable("ACTIONS", "When");
-        commentTableVerifications = new CommentTable("VERIFICATIONS", "Then");
+        commentTableActions = new CommentTable("ACTIONS");
+        commentTableVerifications = new CommentTable("VERIFICATIONS");
         commentTables = new ArrayList<>();
 
         when(commentClass.getClassComment()).thenReturn(comment);

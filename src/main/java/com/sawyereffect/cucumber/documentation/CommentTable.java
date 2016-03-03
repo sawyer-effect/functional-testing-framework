@@ -6,12 +6,10 @@ import java.util.List;
 
 public class CommentTable {
     private String classification;
-    private String classifier;
     private List<CommentRow> commentRows;
 
-    public CommentTable(String classification, String classifier) {
+    public CommentTable(String classification) {
         this.classification = classification;
-        this.classifier = classifier;
         this.commentRows = new ArrayList<>();
     }
 
@@ -23,9 +21,6 @@ public class CommentTable {
         return commentRows;
     }
 
-    public String getClassifier() {
-        return classifier;
-    }
 
     public void addRow(CommentRow commentRow) {
         getCommentRows().add(commentRow);
