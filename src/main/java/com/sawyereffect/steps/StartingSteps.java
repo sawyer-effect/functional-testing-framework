@@ -2,11 +2,6 @@ package com.sawyereffect.steps;
 
 import com.sawyereffect.util.DriverFactory;
 import com.sawyereffect.util.PropertyReader;
-import cucumber.api.Scenario;
-import cucumber.api.java.After;
-import cucumber.api.java.AfterStep;
-import cucumber.api.java.Before;
-import cucumber.api.java.BeforeStep;
 import cucumber.api.java.en.Given;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -17,19 +12,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class StartingSteps {
+public class StartingSteps extends DriverFactory{
 
-    private static final String TAKE_SCREENSHOT = "Screenshot";
     private final Logger logger = LoggerFactory.getLogger(StartingSteps.class);
-    private DriverFactory driverFactory;
-    private WebDriver driver;
     private final PropertyReader reader = PropertyReader.getPropertyReader();
+    private final WebDriver driver = getDriver();
 
-    @Before
-    public void setupDriver() throws IOException {
-        driverFactory = new DriverFactory();
-        driver = driverFactory.getDriver();
-    }
 
     @Given("^User is in google main page$")
     public void user_is_on_home_page() throws Throwable {
@@ -54,30 +42,4 @@ public class StartingSteps {
                 By.id("hplogo")));
     }
 
-
-    @After
-    public void quitDriver(Scenario scenario) throws IOException {
-
-        if (driver != null && (scenario.isFailed() || scenario.getName().contains(TAKE_SCREENSHOT))) {
-
-            logger.debug("Taking screenshot of scenario {}", scenario.getName());
-
-            final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-            scenario.embed(screenshot, "image/png");
-        }
-
-        if (driverFactory != null) {
-            driverFactory.destroyDriver();
-        }
-    }
-
-    @BeforeStep
-    public void beforeStep(Scenario scenario) {
-        logger.debug("Executing before every step {}", scenario.getName());
-    }
-
-    @AfterStep
-    public void afterStep(Scenario scenario) {
-        logger.debug("Executing after every step {}", scenario.getName());
-    }
 }
