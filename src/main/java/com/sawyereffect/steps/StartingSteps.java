@@ -62,8 +62,12 @@ public class StartingSteps {
 
             logger.debug("Taking screenshot of scenario {}", scenario.getName());
 
-            final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-            scenario.embed(screenshot, "image/png");
+            try {
+                final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+                scenario.embed(screenshot, "image/png");
+            } catch (Exception e){
+                logger.error("Not able to take screenshot");
+            }
         }
 
         if (driverFactory != null) {
