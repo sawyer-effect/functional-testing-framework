@@ -39,8 +39,8 @@ public class Hooks {
                 final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
                 scenario.embed(screenshot, "image/png");
             } catch (WebDriverException e){
-                logger.error("Not able to take screenshot: {}", e.getMessage());
-                e.printStackTrace();
+                logger.error("Not able to take screenshot", e);
+
             }
         }
 
