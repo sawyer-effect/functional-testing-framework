@@ -115,4 +115,11 @@ public class DriverFactory {
             driver.quit();
         }
     }
+
+    public void resetDriver() {
+        String identifier = Thread.currentThread().getName();
+        driverMap.remove(identifier);
+
+        getDriver();
+    }
 }
